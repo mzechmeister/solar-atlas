@@ -2,96 +2,91 @@ import numpy as np
 import json
 from os.path import getsize
 
-WINDOW_SIZE = 16
+WINDOW_SIZE = 4
 MAX_ELEMENTS = 4000
 
 filename = 'data/solar_atlas_V1'
-data = np.loadtxt(filename)
-xlim = [np.min(data[:,0]), np.max(data[:,0])]
+#filename = 'data/tmp'
+data = np.fromfile(filename, sep="\t").reshape(-1,3).T
+
 print('finished loading data.')
 print('----------------')
 
 
 class LOD:
+    # level of detail
     def __init__(self, level, data):
         self.level = level
         self.data = data
+        self.xi = data[0]
+        self.yi = data[1]
         self.LSIZE = WINDOW_SIZE**level
-        self.nele = int(np.ceil(len(data)/self.LSIZE))
-        self.ymin=[]
-        self.ymax=[]
-        self.xmean=[]
+        self.K = int(np.ceil(self.xi.size/self.LSIZE)) # number of knots
         self.filename = 'data/solar_'+str(level)
-        self.fout = open(self.filename, 'w')
-
-    def __del__(self):
-        if not self.fout.closed:
-            self.fout.close()
 
     def process(self):
-        lin = np.linspace(np.min(self.data[:,0]), np.max(self.data[:,0]), self.nele+1)
-        bin_width = lin[1]-lin[0]
-        n = 0
-        l = []
-        fin = []
-        for i in range(len(self.data[:,0])):
-            if self.data[:,0][i] >= lin[n] and self.data[:,0][i] <= lin[n+1]:
-                l.append(self.data[:,1][i])
-            else:
-                fin.append(np.array([lin[n]+bin_width, np.min(l), np.max(l)]))
-                n = n+1
-                while self.data[:,0][i] > lin[n+1]:
-                    fin.append(np.array([lin[n]+bin_width, 0, 0]))
-                    n = n+1
-                l = []
-                l.append(self.data[:,1][i])
-        fin.append(np.array([lin[n]+bin_width, np.min(l), np.max(l)]))
-        stacking = fin[0]
-        for i in range(1,len(fin)):
-            stacking = np.vstack((stacking, fin[i]))
-        self.xmean = stacking[:,0]
-        self.ymin = stacking[:,1]
-        self.ymax = stacking[:,2]
+        # bin statistic
+        xi = self.xi
+        ki = np.floor(self.K * (xi-xi[0]) / (xi[-1]-xi[0])).astype(int)
+        ki[-1] -= 1   # move the last point to last bin
+        xk = np.linspace(xi[0], xi[-1], self.K+1)
+        xk += (xk[1]-xk[0]) / 2
+#        ymin = np.nan * xk
+#        ymax = np.nan * xk
+        ymin = 0. * xk
+        ymax = 0. * xk
+        sk = np.where(np.diff(ki))[0] + 1
+        for start,stop in zip(np.hstack([0, sk]), np.hstack([sk,-1])):
+            l = self.yi[start:stop]
+            #print(start, stop,ki[start], np.min(l), np.max(l),l)
+            ymin[ki[start]] = np.min(l)
+            ymax[ki[start]] = np.max(l)
+
+        self.xk = xk
+        self.ymin = ymin
+        self.ymax = ymax
 
     def write_to_file(self):
         precision = 10
-        maxlength = len(str(round(np.max(self.xmean)))) + precision + 1
-        for i in range(0, self.nele):
-            self.fout.write('%0*.*f\t%.*f\t%.*f\n'%(maxlength, precision, self.xmean[i], precision, self.ymin[i], precision, self.ymax[i]))
-        self.fout.close()
+        maxlength = len(str(int(np.max(self.xk)))) + precision + 1
+        with open(self.filename, 'w') as fout:
+            for k in range(self.K):
+                fout.write('%0*.*f\t%.*f\t%.*f\n'%(maxlength, precision, self.xk[k], precision, self.ymin[k], precision, self.ymax[k]))
         print('created lod-file: ' + self.filename + '.')
         #end fout stream and create descriptor
         self.descriptor = {
                 "fileName": self.filename,
                 "fileSize": getsize(self.filename),
                 "level": self.level,
-                "nElements": self.nele
+                "nElements": self.K
                 }
 
-    def reDescriptor(self):
-        return self.descriptor
 
-nLodLevels = int(np.ceil(np.log(len(data)/MAX_ELEMENTS)/np.log(WINDOW_SIZE)))
+nLodLevels = int(np.ceil(np.log(len(data[0])/MAX_ELEMENTS)/np.log(WINDOW_SIZE)))
 lodDescriptor = []
-print('processing ' + str(nLodLevels) + ' levels of detail.')
+
+print('processing', nLodLevels, 'levels of detail.')
 print('----------------')
 for i in range(1, nLodLevels+1):
     p = LOD(i, data)
     p.process()
     p.write_to_file()
-    lodDescriptor.append(p.reDescriptor())
+    lodDescriptor.append(p.descriptor)
 print('----------------')
 
 descriptor = {
         "fileName": filename,
         "fileSize": getsize(filename),
-        "nElements": len(data),
-        "xMin": xlim[0],
-        "xMax": xlim[1],
+        "nElements": len(data[0]),
+        "xMin": data[0].min(),
+        "xMax": data[0].max(),
         "maxElements": MAX_ELEMENTS,
         "windowSize": WINDOW_SIZE,
         "lodFiles": lodDescriptor
         }
+
 with open('data/descriptor.json', 'w') as outf:
     json.dump(descriptor, outf)
 print('wrote to data/descriptor.json.\n exiting.')
+
+

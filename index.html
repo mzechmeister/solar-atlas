@@ -7,8 +7,11 @@
         svg {
             display: block;
             margin: 0 auto;
+            font: sans-serif;
+            font-size: 14px;
         }
-    
+   .x-axis, .y-axis, .x2-axis, .y2-axis { font-size: 14px 
+   } 
         .area {
             fill: steelblue;
             stroke: steelblue;
@@ -25,19 +28,36 @@
             clip-path: url(#clip);
         }
 
+        .selection {
+            stroke: red;
+        }
+
         h1 {
             text-align: center;
         }
 
     </style>
 </head>
-<h1>Spectrum</h1>
+<h1>IAG solar flux atlas</h1>
 <body>
-    <svg width="1240" height="640" id="canvas"></svg> <!-- 980  !-->
+<div style="display: flex;
+  justify-content: center;">
+   <button type="button" id="lleft">&larr;&larr;</button>
+   <button type="button" id="left">&larr;</button>
+   <button type="button" id="zoomin" title="zoom in <kbd>+</kbd>  <kbd>arrow-Up</kbd>">+</button>
+   <button type="button" id="zoomout">-</button>
+   <button type="button" id="unzoom" title="unzoom <kbd>u</kbd>">&#8962</button>
+   <button type="button" id="right">&rarr;</button> 
+   <button type="button" id="rright">&rarr;&rarr;</button> 
+   <input type="checkbox" id="logwave" name="scales"
+         checked><label for="logwave">log(lambda)</label>
+</div>
+
+   <svg width="1240" height="640" id="canvas"  style="background-color:white"></svg> <!-- 980  !-->
+    <a href='https://ui.adsabs.harvard.edu/abs/2016A%26A...587A..65R'>Reiners+ (2016, A&A) </a>
 </body>
-<script src="plot.js"</script>
-<script>
-    plot(d3.select("#canvas"));
+<script src="plot.js">
 </script>
+
 </html>
 

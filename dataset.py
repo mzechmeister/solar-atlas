@@ -10,7 +10,7 @@ sorted_data= raw[raw[:,col].argsort()]
 sorted_data2= raw2[raw2[:,col].argsort()]
 fout = open('data/solar_atlas_V1', 'w')
 precision = 10
-maxlength = precision + 1 + len(str(round(max(sorted_data[:,0]))))
+maxlength = precision + 1 + len(str(int(max(sorted_data[:,0]))))
 
 for i in range(0,len(sorted_data[:,0])):
     fout.write('%0*.*f\t%0.*f\t%0.*f\n'%(maxlength, precision, sorted_data[i,0], precision, sorted_data[i,1], precision, sorted_data[i,2]))
