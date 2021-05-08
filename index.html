@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>spectrum</title>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<!--<script src="https://d3js.org/d3.v6.min.js"></script>!-->
+  <style>
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+    
+        .area {
+            fill: steelblue;
+            stroke: steelblue;
+            stroke-width: 0.5;
+            clip-path: url(#clip);
+        }
+    
+        .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            stroke-width: 1.5;
+            clip-path: url(#clip);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+    </style>
+</head>
+<h1>Spectrum</h1>
+<body>
+    <svg width="1240" height="640" id="canvas"></svg> <!-- 980  !-->
+</body>
+<script src="plot.js"</script>
+<script>
+    plot(d3.select("#canvas"));
+</script>
+</html>
+
