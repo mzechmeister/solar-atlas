@@ -1,5 +1,9 @@
 plot(d3.select("#canvas"));
 
+var linelist = [];
+d3.text("http://cdsarc.unistra.fr/ftp/J/A+A/587/A65/tablea1.dat")
+     .then(function(d){linelist = d3.csvParse("lambda,EW,relDepth,ConvBS\n"+d.replace(/ +/g, ","))})
+
 function plot(svg){
     const DESCRIPTOR_FILE = "data/descriptor.json";
 
@@ -53,7 +57,6 @@ function plot(svg){
         .scaleLinear()
         .domain([0, 1])
         .range([0, width])
-        .clamp(true);
 
     var xScale = (d3.select("#logwave").property("checked")? d3.scaleLog() : d3.scaleLinear())
         .domain([0, 1])
@@ -170,9 +173,10 @@ function plot(svg){
     g2.append("g")
         .attr("class", "y-axis")
         .call(yAxis2);
-    
+
     // Data view
-    const gDataView = g.append("g").attr("class", "data-view");
+    const gDataView = g.append('svg').attr("class", "data-clip").attr("width", width)   // svg to clip points out of graph
+                       .append("g").attr("class", "data-view");
     const gDataView2 = g2.append("g").attr("class", "data-view2");
 
     g.append("g")
@@ -272,7 +276,9 @@ function plot(svg){
         gDataView
             .insert("path")
             .attr("class", getClass(data))
-            .attr("d", pathFunc(data.elements));
+            .attr("d", pathFunc(data.elements));   // here we draw the spectrum as a line
+
+        draw_nave()
 
         gDataView2
             .insert("path")
@@ -396,7 +402,7 @@ function plot(svg){
         }
         d3.event.preventDefault();   // prevent page scroll for Home, End, Arrow keys
     }
-    
+
     async function zoom(domain){
         let scaleDomain = [];
         scaleDomain[0] = (domain[0]-X_FULL_DOMAIN[0]) / (X_FULL_DOMAIN[1]-X_FULL_DOMAIN[0]);
@@ -416,7 +422,7 @@ function plot(svg){
         //circle.remove();
         gDataView.select("*").remove();
         g.selectAll("circle").remove();
-        
+ 
         pathFunc.x((d) => xDataScale(d.x));
 
         gDataView
@@ -425,7 +431,24 @@ function plot(svg){
             .attr("d", pathFunc(data.elements));
 
         if(data.level == 0) drawScatter();
+
+        draw_nave()
+
         svg.select(".x-axis").call(xAxis);
+    }
+
+    function draw_nave(){
+        gDataView.selectAll(".navemarkers")
+            .data(linelist)
+            .enter().append("circle")
+            .attr("cx", (d) => xDataScale(d.lambda*10) )
+            .attr("cy", (d) => yScale(1-d.relDepth) )
+            .attr("r", 3)
+            .attr("class", "navemarkers")
+            .attr("fill", "None")
+            .attr("stroke", "red")
+            .attr("visibility", document.getElementById("cbnave").checked?"visible":"hidden")
+            .on("mouseover", function(){return tooltip.style("visibility", document.getElementById("cbnave").checked?"visible":"hidden");})
     }
 
     function mouseoverCircle(d){

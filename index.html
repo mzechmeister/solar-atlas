@@ -38,8 +38,9 @@
 
     </style>
 </head>
-<h1>IAG solar flux atlas</h1>
+
 <body>
+<h1>IAG solar flux atlas</h1>
 <div style="display: flex;
   justify-content: center;">
    <button type="button" id="lleft">&larr;&larr;</button>
@@ -51,10 +52,12 @@
    <button type="button" id="rright">&rarr;&rarr;</button> 
    <input type="checkbox" id="logwave" name="scales"
          checked><label for="logwave">log(lambda)</label>
+   <input type="checkbox" id="cbnave" name="nave"
+        onclick='d3.selectAll(".navemarkers").attr("visibility", this.checked?"visible":"hidden")'><label for="cbnave">FeI lines (Nave+ 1994)</label>
 </div>
 
    <svg width="1240" height="640" id="canvas"  style="background-color:white"></svg> <!-- 980  !-->
-      
+
 <div>
    <a href='https://ui.adsabs.harvard.edu/abs/2016A%26A...587A..65R'>Reiners+ (2016, A&A)</a><br>
    <a href='atlas_print_version_4000-23000.pdf'>atlas_print_version_4000-23000.pdf</a><br>
