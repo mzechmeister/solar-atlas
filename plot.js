@@ -271,7 +271,7 @@ function plot(svg){
         g.append("text")
             .attr("transform","translate(" + width / 2 + " ," + (height + margin.top+25) + ")")
             .style("text-anchor", "middle")
-            .text("wavelength [Å]");
+            .text("vacuum wavelength [Å]");
 
         gDataView
             .insert("path")
@@ -438,6 +438,7 @@ function plot(svg){
     }
 
     function draw_nave(){
+
         gDataView.selectAll(".navemarkers")
             .data(linelist)
             .enter().append("circle")
