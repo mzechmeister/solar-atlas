@@ -20,9 +20,9 @@ function plot(svg){
         left: 30
     };
 
-    const width = svg.attr("width") - margin.left - margin.right;
-    const height = svg.attr("height") - margin.top - margin.bottom - 30;
-    const height2 = svg.attr("height") - margin2.top - margin2.bottom - 30;
+    const width = +svg.attr("viewBox").split(" ")[2] - margin.left - margin.right;
+    const height = +svg.attr("viewBox").split(" ")[3] - margin.top - margin.bottom - 30;
+    const height2 = +svg.attr("viewBox").split(" ")[3]- margin2.top - margin2.bottom - 30;
     const g = svg
         .append("g")
         .classed("g1", true)
