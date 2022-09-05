@@ -36,7 +36,7 @@ function plot(svg){
              d3.event.preventDefault();   // prevent context menu
         });
 
-    svg.on("wheel", function () { d3.event.preventDefault(); 
+    svg.on("wheel", function () { d3.event.preventDefault();
         fac = d3.event.deltaY;
         fac = fac>99 || fac <-99 ?  fac/120 : fac
         zoomfac(0.1*fac/3);})
@@ -140,7 +140,7 @@ function plot(svg){
 //            dx = xcennew - (xlim[1]+xlim[0])/2;
             ilimnew = [icennew-iwidth/2, icennew+iwidth/2]
             ilimnew = [clamp(ilimnew[0], r[0], r[1]-iwidth), clamp(ilimnew[1], r[0]+iwidth, r[1])];
-//            panx(dx); 
+//            panx(dx);
             d3.select(".brush2").call(brush2.move, ilimnew);
         };
         b2box.attr("cursor", "grab");
@@ -348,32 +348,32 @@ function plot(svg){
         return Math.min(Math.max(value, min), max);
     }
 
-    function panxfac(fac) { 
+    function panxfac(fac) {
         var width = currentData.domain[1]-currentData.domain[0];
         panx(width*fac);
-    } 
+    }
 
-    function panx(dx) { 
+    function panx(dx) {
         var width = currentData.domain[1]-currentData.domain[0];
         if(dx) {
-            currentData.domain[0] = clamp(currentData.domain[0] + dx, X_FULL_DOMAIN[0], X_FULL_DOMAIN[1]-width); 
-            currentData.domain[1] = clamp(currentData.domain[1] + dx, X_FULL_DOMAIN[0]+width, X_FULL_DOMAIN[1]); 
+            currentData.domain[0] = clamp(currentData.domain[0] + dx, X_FULL_DOMAIN[0], X_FULL_DOMAIN[1]-width);
+            currentData.domain[1] = clamp(currentData.domain[1] + dx, X_FULL_DOMAIN[0]+width, X_FULL_DOMAIN[1]);
             d3.select(".brush2").call(brush2.move, currentData.domain.map(xScale));
             }
-        } 
+        }
 
-    function zoomfac(fac) { 
+    function zoomfac(fac) {
           if(((currentData.domain[0] != X_FULL_DOMAIN[0]) ||fac<0)&& currentData.level > -1) {
 //            if(currentData.level > -1) {
                 var width = currentData.domain[1]-currentData.domain[0];
                 var dx = fac*width
-                currentData.domain[0] = currentData.domain[0] - dx; 
-                currentData.domain[1] = currentData.domain[1] + dx; 
+                currentData.domain[0] = currentData.domain[0] - dx;
+                currentData.domain[1] = currentData.domain[1] + dx;
                 d3.select(".brush2").call(brush2.move, currentData.domain.map(xScale));   // calls zoom
             }
     }
 
-    function unzoom() { 
+    function unzoom() {
         d3.select(".brush2").call(brush2.move, X_FULL_DOMAIN.map(xScale));   //  zoom
         hideFocus();
     }
@@ -422,7 +422,7 @@ function plot(svg){
         //circle.remove();
         gDataView.select("*").remove();
         g.selectAll("circle").remove();
- 
+
         pathFunc.x((d) => xDataScale(d.x));
 
         gDataView
@@ -551,7 +551,7 @@ function plot(svg){
         if (nElements <= dataDescriptor.maxElements) return 0;
 
         let a = Math.log(nElements/dataDescriptor.maxElements);
-        let b = Math.log(dataDescriptor.windowSize); //adjustment 2* 
+        let b = Math.log(dataDescriptor.windowSize); //adjustment 2*
        // console.log(nElements,dataDescriptor.windowSize,a,b, a/b, Math.ceil(a/b))
         return Math.ceil(a/b);
     }
