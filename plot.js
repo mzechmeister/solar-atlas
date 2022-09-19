@@ -2,9 +2,9 @@ plot(d3.select("#canvas"));
 
 var linelist = [];
 d3.text("http://cdsarc.unistra.fr/ftp/J/A+A/587/A65/tablea1.dat")
-     .then(function(d){linelist = d3.csvParse("lambda,EW,relDepth,ConvBS\n"+d.replace(/ +/g, ","))})
+     .then(function(d) {linelist = d3.csvParse("lambda,EW,relDepth,ConvBS\n"+d.replace(/ +/g, ","))})
 
-function plot(svg){
+function plot(svg) {
     const DESCRIPTOR_FILE = "data/descriptor.json";
 
     const margin = {
@@ -65,9 +65,11 @@ function plot(svg){
 
     // Setup the axes.
     ticsize = 6;
-    const xAxis = d3.axisBottom(xDataScale).ticks(10).tickFormat(d3.format("")).tickSizeInner([ticsize]);
+    unitnm = 0   // 0: Angstrom, 1: nm
+    wavefmt = e => {return unitnm ? d3.format("")(0.1*e) : d3.format("")(e)}      // nm or Angstrom, only tic labels are changed
+    const xAxis = d3.axisBottom(xDataScale).ticks(10).tickFormat(wavefmt).tickSizeInner([ticsize]);
     const yAxis = d3.axisLeft(yScale).ticks(4).tickSizeInner([ticsize]);
-    const xAxis2 = d3.axisBottom(xScale).ticks(10).tickFormat(d3.format("")).tickSizeInner([ticsize]);
+    const xAxis2 = d3.axisBottom(xScale).ticks(10).tickFormat(wavefmt).tickSizeInner([ticsize]);
     const yAxis2 = d3.axisLeft(yScale2).ticks(4).tickSizeInner([ticsize]);
 
     // The charting function
@@ -89,18 +91,18 @@ function plot(svg){
 
     const brush = d3.brushX()
         .extent([[0,1], [width, height - 1]])
-        .on("start", function(){
+        .on("start", function() {
                 b1over.attr("cursor", "ew-resize")})
         .on("end", brushEnded);
-    brush.filter(function (){return d3.event.button == 2}); // brush with right click
+    brush.filter(function () {return d3.event.button == 2}); // brush with right click
 
-    function brushEnded(){
+    function brushEnded() {
         const s = d3.event.selection;
-        if(s){
+        if (s) {
             d3.select(".brush2").call(brush2.move, s.map(xDataScale.invert).map(xScale));
             svg.select(".brush").call(brush.move, null);   // removes the brush
-        }else{
-            if(!idleTimeout){
+        } else {
+            if (!idleTimeout) {
                 return (idleTimeout = setTimeout(()=>{
                     idleTimeout = null;
                 }, IDLE_DELAY));
@@ -112,16 +114,17 @@ function plot(svg){
 
     const brush2 = d3.brushX(xDataScale)
         .extent([[0,1], [width, height2 - 1]])
-        .on("start", function(){ // allow again left button to move the brush
+        .on("start", function() { // allow again left button to move the brush
                 g2.select(".overlay").attr("cursor", "grabbing");
-                brush2.filter(function (){return d3.event.buttons >0}); } )
+                brush2.filter(function () {return d3.event.buttons > 0}); })
         // move calls also brush.end
         .on("end", brush2End);
-    brush2.filter(function (){return d3.event.button == 2});  // brush with right click
+    brush2.filter(function () {return d3.event.button == 2});  // brush with right click
 
     function brush2End(selection) {
         // make zoom and pan from overview panel
         inew = d3.event.selection;  // new position of the brush
+        if (event.target.tagName == "a") return   // don't brush when clicking on the link
         if (inew) {
             //console.log(g2.selectAll("selection"), inew);
             xnew = inew.map(xScale.invert);
@@ -129,7 +132,7 @@ function plot(svg){
             zoom(xnew);  // brush2.move -> brush2.end -> zoom1
 
             // d3.select(".brush2").call(brush2.move, inew); //too much recursion
-       }else{
+       } else {
             // just for click
             xlim = xDataScale.domain();
             ilim = xlim.map(xScale);
@@ -184,7 +187,7 @@ function plot(svg){
         .on("contextmenu", function (d, i) {
             d3.event.preventDefault();   // prevent context menu
         })
-        .on("mousedown", function(){
+        .on("mousedown", function() {
             if (d3.event.buttons==2) {
                 // dynamically add the brush
                 // no need for mouseup event
@@ -193,7 +196,7 @@ function plot(svg){
         .call(brush);  // creates rect overlay and rect selection
 
     b1over = g.select(".overlay")
-        .on("mousedown", function(){
+        .on("mousedown", function() {
             if (d3.event.buttons==2) {
                 b1over.attr("cursor", "ew-resize")
             } else {
@@ -203,7 +206,7 @@ function plot(svg){
                 b1over.attr("cursor", "grabbing")
             }
         });
-        g.on("mouseup", function(){
+        g.on("mouseup", function() {
             // finish panning
             X1 = d3.event.clientX;
             dx = -(xDataScale.invert(X1) - xDataScale.invert(X0));
@@ -228,17 +231,17 @@ function plot(svg){
 
     b2box = g2.select(".selection")
         .attr("cursor", "grab")
-        .on("mousedown", function(){g2.select(".overlay").attr("cursor", "grabbing")});
+        .on("mousedown", function () {g2.select(".overlay").attr("cursor", "grabbing")});
 
 
-    d3.select("#right").on("click", function(){panxfac(0.1)});
-    d3.select("#rright").on("click", function(){panxfac(1)});
-    d3.select("#left").on("click", function(){panxfac(-0.1)});
-    d3.select("#lleft").on("click", function(){panxfac(-1)});
-    d3.select("#zoomin").on("click", function(){zoomfac(-0.1)});
-    d3.select("#zoomout").on("click", function(){zoomfac(0.1)});
+    d3.select("#right").on("click", function() {panxfac(0.1)});
+    d3.select("#rright").on("click", function() {panxfac(1)});
+    d3.select("#left").on("click", function() {panxfac(-0.1)});
+    d3.select("#lleft").on("click", function() {panxfac(-1)});
+    d3.select("#zoomin").on("click", function() {zoomfac(-0.1)});
+    d3.select("#zoomout").on("click", function() {zoomfac(0.1)});
     d3.select("#unzoom").on("click", unzoom);
-    d3.select("#logwave").on("click", function (){
+    d3.select("#logwave").on("click", function () {
     location.reload()  // toggling while keeping the brush would be nicer
 //plot(d3.select("#canvas"));
 /*       xScale = (d3.select("#logwave").property("checked")? d3.scaleLog() : d3.scaleLinear())
@@ -250,7 +253,7 @@ function plot(svg){
     main();
     var currentData = [];
 
-    async function main(){
+    async function main() {
         await fetchDescriptor();
 
         X_FULL_DOMAIN = [dataDescriptor.xMin, dataDescriptor.xMax];
@@ -271,7 +274,20 @@ function plot(svg){
         g.append("text")
             .attr("transform","translate(" + width / 2 + " ," + (height + margin.top+25) + ")")
             .style("text-anchor", "middle")
-            .text("vacuum wavelength [Å]");
+            .text("vacuum wavelength ")
+            .append("a").attr("xlink:href", "").text("[Å]").on("click", toggle_waveunit, true)
+            .append("title").text("toggle unit nm/Å");
+
+        function toggle_waveunit(e) {
+            event.preventDefault();
+            linktext = event.target.firstChild;
+            unitnm = linktext.textContent != "[nm]";  // toggle next state
+            console.log(unitnm)
+            linktext.textContent = unitnm ? "[nm]" :  "[Å]";
+            svg.selectAll(".x-axis").call(xAxis);
+            svg.selectAll(".x2-axis").call(xAxis2);
+            return false;
+        }
 
         gDataView
             .insert("path")
@@ -286,21 +302,21 @@ function plot(svg){
             .attr("d", area2(data.elements));
     }
 
-    function getPathFunction(data){
+    function getPathFunction(data) {
         return data.level > 0 ? area : line;
     }
 
-    function getClass(data){
+    function getClass(data) {
         return data.level > 0 ? "dataView area" : "dataView line";
     }
 
-    function drawScatter(){
+    function drawScatter() {
             //only hitbox atm
             g.selectAll(".dot")
                 .data(currentData.elements)
                 .enter().append("circle")
-                .attr("cx", (d) => xDataScale(d.x) )
-                .attr("cy", (d) => yScale(d.y) )
+                .attr("cx", (d) => xDataScale(d.x))
+                .attr("cy", (d) => yScale(d.y))
                 .attr("id", "scatter")
                 .attr("fill", "None")
                 .attr("stroke", "steelblue")
@@ -310,10 +326,10 @@ function plot(svg){
                 .on("mouseover", mouseoverCircle)
                 .on('mouseout', mouseoutCircle)
                 .on('mousemove', mousemoveCircle);
-            g.append("circle")                                 // **********
+            g.append("circle")
                 .attr("id", "focus")
-                .style("fill", "none")                             // **********
-                .style("stroke", "steelblue")                           // **********
+                .style("fill", "none")
+                .style("stroke", "steelblue")
                 .style('opacity', 0)
                 .attr("r", 12);
             g.append("line")
@@ -330,15 +346,15 @@ function plot(svg){
                 .style('opacity', 0);
     }
 
-    function hideFocus(){
+    function hideFocus() {
             div.style('opacity', 0);
             g.select('#focus').style('opacity', 0);
             g.select('#focuslineX').style('opacity', 0);
             g.select('#focuslineY').style('opacity', 0);
     }
 
-    function keyup(){
-        if(d3.event.key == 'u'){ // unzoom
+    function keyup() {
+        if (d3.event.key == 'u') { // unzoom
             unzoom();
         }
     }
@@ -355,7 +371,7 @@ function plot(svg){
 
     function panx(dx) {
         var width = currentData.domain[1]-currentData.domain[0];
-        if(dx) {
+        if (dx) {
             currentData.domain[0] = clamp(currentData.domain[0] + dx, X_FULL_DOMAIN[0], X_FULL_DOMAIN[1]-width);
             currentData.domain[1] = clamp(currentData.domain[1] + dx, X_FULL_DOMAIN[0]+width, X_FULL_DOMAIN[1]);
             d3.select(".brush2").call(brush2.move, currentData.domain.map(xScale));
@@ -363,8 +379,8 @@ function plot(svg){
         }
 
     function zoomfac(fac) {
-          if(((currentData.domain[0] != X_FULL_DOMAIN[0]) ||fac<0)&& currentData.level > -1) {
-//            if(currentData.level > -1) {
+          if (((currentData.domain[0] != X_FULL_DOMAIN[0]) ||fac<0) && currentData.level > -1) {
+//            if (currentData.level > -1) {
                 var width = currentData.domain[1]-currentData.domain[0];
                 var dx = fac*width
                 currentData.domain[0] = currentData.domain[0] - dx;
@@ -378,48 +394,47 @@ function plot(svg){
         hideFocus();
     }
 
-    function keydown(){
+    function keydown() {
         let file;
-        if (currentData.level === 0){
+        if (currentData.level === 0) {
             file = dataDescriptor.fileName;
             nElements = dataDescriptor.nElements;
-        }else{
+        } else {
             file = dataDescriptor.lodFiles[currentData.level - 1].fileName;
             nElements = dataDescriptor.lodFiles[currentData.level - 1].nElements;
         }
 
         // zooming
         var fac = ({'-': 0.1, '+': -0.1, 'ArrowDown': 0.1, 'ArrowUp': -0.1})[d3.event.key];
-        if(fac){
+        if (fac) {
            zoomfac(fac)
         }
 
         // panning
         var fac = ({'ArrowLeft': -0.1, 'ArrowRight': 0.1, 'Home': -1, 'End': 1})[d3.event.key];
-        if (fac){
+        if (fac) {
            panxfac(fac)
            //return false;
         }
         d3.event.preventDefault();   // prevent page scroll for Home, End, Arrow keys
     }
 
-    async function zoom(domain){
+    async function zoom(domain) {
         let scaleDomain = [];
         scaleDomain[0] = (domain[0]-X_FULL_DOMAIN[0]) / (X_FULL_DOMAIN[1]-X_FULL_DOMAIN[0]);
         scaleDomain[1] = (domain[1]-X_FULL_DOMAIN[0]) / (X_FULL_DOMAIN[1]-X_FULL_DOMAIN[0]);
-        if (scaleDomain[1]-scaleDomain[0] < MIN_ZOOM_ELEMENTS/dataDescriptor.nElements){
+        if (scaleDomain[1]-scaleDomain[0] < MIN_ZOOM_ELEMENTS/dataDescriptor.nElements) {
             console.log("Max Zoom");
             return;
         }
 
-            console.log(domain);
+        console.log(domain);
         xDataScale.domain(domain);
 
-        const data = await fetchData(domain);   //using binarySearch
-        currentData = data; //save for keycontrol
+        const data = await fetchData(domain);   // using binarySearch
+        currentData = data; // save for keycontrol
         const pathFunc = getPathFunction(data);
 
-        //circle.remove();
         gDataView.select("*").remove();
         g.selectAll("circle").remove();
 
@@ -430,29 +445,28 @@ function plot(svg){
             .attr("class", getClass(data))
             .attr("d", pathFunc(data.elements));
 
-        if(data.level == 0) drawScatter();
+        if (data.level == 0) drawScatter();
 
         draw_nave()
 
         svg.select(".x-axis").call(xAxis);
     }
 
-    function draw_nave(){
-
+    function draw_nave() {
         gDataView.selectAll(".navemarkers")
             .data(linelist)
             .enter().append("circle")
-            .attr("cx", (d) => xDataScale(d.lambda*10) )
-            .attr("cy", (d) => yScale(1-d.relDepth) )
+            .attr("cx", (d) => xDataScale(d.lambda*10))
+            .attr("cy", (d) => yScale(1-d.relDepth))
             .attr("r", 3)
             .attr("class", "navemarkers")
             .attr("fill", "None")
             .attr("stroke", "red")
             .attr("visibility", document.getElementById("cbnave").checked?"visible":"hidden")
-            .on("mouseover", function(){return tooltip.style("visibility", document.getElementById("cbnave").checked?"visible":"hidden");})
+            .on("mouseover", function() {return tooltip.style("visibility", document.getElementById("cbnave").checked?"visible":"hidden");})
     }
 
-    function mouseoverCircle(d){
+    function mouseoverCircle(d) {
         //showFocus()
         div.style('opacity', 0.8).html("x: "+d.x+"<br\/>"+"y: "+d.y);
         g.select('#focus')
@@ -473,20 +487,20 @@ function plot(svg){
             .attr("y2", yScale(Y_DOMAIN[0]));
     }
 
-    function mouseoutCircle(){
+    function mouseoutCircle() {
         hideFocus();
     }
 
-    function mousemoveCircle(){
+    function mousemoveCircle() {
         d3.select('#tooltip').style('left', (d3.event.pageX+10) + 'px').style('top', (d3.event.pageY+10) + 'px');
     }
 
-    async function fetchDescriptor(){
+    async function fetchDescriptor() {
         const response = await fetch(DESCRIPTOR_FILE);
         dataDescriptor = await response.json();
     }
 
-    async function fetchData(domain){
+    async function fetchData(domain) {
         //idea: when domain == X_FULL_DOMAIN => nn for binarySearch
         let scaleDomain = [];
         scaleDomain[0] = (domain[0]-X_FULL_DOMAIN[0]) / (X_FULL_DOMAIN[1]-X_FULL_DOMAIN[0]);
@@ -500,15 +514,15 @@ function plot(svg){
         let elements = [];
 
         let file;
-        if (level === 0){
+        if (level === 0) {
             nElements = dataDescriptor.nElements;
             file = dataDescriptor.fileName;
-        }else{
+        } else {
             nElements = dataDescriptor.lodFiles[level - 1].nElements;
             file = dataDescriptor.lodFiles[level - 1].fileName;
         }
 
-        if (level > 0){
+        if (level > 0) {
             const elementStart = Math.max(Math.floor(scaleDomain[0] * nElements), 0);
             const elementEnd = Math.min(
                  Math.ceil(scaleDomain[1] * nElements),
@@ -518,7 +532,7 @@ function plot(svg){
             const rangeEnd = elementEnd * ELEMENT_SIZE + ELEMENT_SIZE - 1;
             const buf = await fetchByteRange(file, rangeStart, rangeEnd);
 
-            d3.tsvParseRows(buf, function(i){
+            d3.tsvParseRows(buf, function(i) {
                 //idea elements.shift() and push() fetch -> (elementEnd+1)*ELEMENT_SIZE <---> (elementEnd+2)*ELEMENT_SIZE + ELEMENT_SIZE - 1
                 elements.push({
                     x : parseFloat(i[0]),
@@ -526,14 +540,14 @@ function plot(svg){
                     max : parseFloat(i[2])
                 });
             });
-        }else{
+        } else {
             const elementStart = await binarySearch(file, domain[0], nElements, false);
             const elementEnd = await binarySearch(file, domain[1], nElements, true);
             const rangeStart = elementStart * ELEMENT_SIZE;
             const rangeEnd = elementEnd * ELEMENT_SIZE + ELEMENT_SIZE - 1;
             const buf = await fetchByteRange(file, rangeStart, rangeEnd);
             //console.log(elementEnd-elementStart);
-            d3.tsvParseRows(buf, function(i){
+            d3.tsvParseRows(buf, function(i) {
                 elements.push({
                     x : parseFloat(i[0]),
                     y : parseFloat(i[1])
@@ -541,10 +555,10 @@ function plot(svg){
             });
         }
         domain = [...domain];  // make a copy, otherwise X_FULL_DOMAIN could be overwritten
-        return { domain, level, elements};
+        return {domain, level, elements};
     }
 
-    function levelFromDomain(domain){
+    function levelFromDomain(domain) {
         const domainSpan = domain[1] - domain[0];
 
         const nElements = Math.ceil(dataDescriptor.nElements * domainSpan);
@@ -556,17 +570,17 @@ function plot(svg){
         return Math.ceil(a/b);
     }
 
-    async function fetchByteRange(file, rangeStart, rangeEnd){
-        const headers = { Range: `bytes=${rangeStart}-${rangeEnd}` };
+    async function fetchByteRange(file, rangeStart, rangeEnd) {
+        const headers = {Range: `bytes=${rangeStart}-${rangeEnd}`};
         const response = await fetch(file, {headers});
 
         return await response.text();
     }
 
-    async function binarySearch(file, target, len, minormax){
+    async function binarySearch(file, target, len, minormax) {
         var L = 0;
         var R = len - 1;
-        while(L<=R){
+        while (L<=R) {
             var m = Math.floor((L+R)/2)
             const ELEMENT_SIZE = 43;
             const needs = 16;
@@ -577,11 +591,11 @@ function plot(svg){
             const buf = await response.text();
             var data_m = parseFloat(buf);
 
-            if (data_m < target){
+            if (data_m < target) {
                 L = m + 1;
-            }else if(data_m > target){
+            } else if (data_m > target) {
                 R = m - 1;
-            }else{
+            } else {
                 return m;
             }
         }
