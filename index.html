@@ -34,6 +34,19 @@
         h1 {
             text-align: center;
         }
+        kbd {
+            background-color: #eee;
+            border-radius: 3px;
+            border: 1px solid #b4b4b4;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+            color: #333;
+            display: inline-block;
+            font-size: .85em;
+            font-weight: 700;
+            line-height: 1;
+            padding: 2px 4px;
+            white-space: nowrap;
+        }
 
     </style>
 </head>
@@ -68,6 +81,13 @@
    the <a href='https://web.sas.upenn.edu/ashbaker/solar-atlas/'>telluric-corrected solar flux atlas</a> by Ashley D. Baker.
 </div>
 
+<h3>Interactivity features and short cuts</h3>
+<ul>
+  <li>mouse zooming (right) and panning (left)</li>
+  <li>keyboard zooming (<kbd>+</kbd>, <kbd>-</kbd>, <kbd>&uarr;</kbd>, <kbd>&darr;</kbd>, <kbd>u</kbd>) and panning (<kbd>&larr;</kbd>, <kbd>&rarr;</kbd>, <kbd>Home</kbd>, <kbd>End</kbd>)</li>
+  <li>tandem brush</li>
+  <li>toggle nm/Angstrom by clicking on the unit</li>
+</ul>
 </body>
 <script src="plot.js"></script>
 
