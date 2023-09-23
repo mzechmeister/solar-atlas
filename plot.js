@@ -1,7 +1,7 @@
 plot(d3.select("#canvas"));
 
 var linelist = [];
-d3.text("http://cdsarc.unistra.fr/ftp/J/A+A/587/A65/tablea1.dat")
+d3.text("tablea1.dat")
      .then(function(d) {linelist = d3.csvParse("lambda,EW,relDepth,ConvBS\n"+d.replace(/ +/g, ","))})
 
 function plot(svg) {
