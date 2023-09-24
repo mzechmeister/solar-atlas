@@ -205,8 +205,8 @@ function plot(svg) {
                 console.log("mousedown",X0);
                 b1over.attr("cursor", "grabbing")
             }
-        });
-        g.on("mouseup", function() {
+        })
+        .on("mouseup", function() {
             // finish panning
             X1 = d3.event.clientX;
             dx = -(xDataScale.invert(X1) - xDataScale.invert(X0));
