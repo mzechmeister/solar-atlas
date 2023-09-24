@@ -126,7 +126,6 @@ function plot(svg) {
         inew = d3.event.selection;  // new position of the brush
         if (event.target.tagName == "a") return   // don't brush when clicking on the link
         if (inew) {
-            //console.log(g2.selectAll("selection"), inew);
             xnew = inew.map(xScale.invert);
 
             zoom(xnew);  // brush2.move -> brush2.end -> zoom1
@@ -191,7 +190,7 @@ function plot(svg) {
             if (d3.event.buttons==2) {
                 // dynamically add the brush
                 // no need for mouseup event
-            } else {g.style("cursor","grab")}
+            } else {g.style("cursor", "grab")}
         })
         .call(brush);  // creates rect overlay and rect selection
 
@@ -202,7 +201,6 @@ function plot(svg) {
             } else {
                 // prepare panning
                 X0 = d3.event.clientX;
-                console.log("mousedown",X0);
                 b1over.attr("cursor", "grabbing")
             }
         })
@@ -282,7 +280,6 @@ function plot(svg) {
             event.preventDefault();
             linktext = event.target.firstChild;
             unitnm = linktext.textContent != "[nm]";  // toggle next state
-            console.log(unitnm)
             linktext.textContent = unitnm ? "[nm]" :  "[Å]";
             svg.selectAll(".x-axis").call(xAxis);
             svg.selectAll(".x2-axis").call(xAxis2);
